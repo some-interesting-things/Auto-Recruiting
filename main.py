@@ -95,7 +95,7 @@ def find_relevant_talent(geek: dict):
         # 对正则的特殊字符进行转义，由于转义的时候会用到\所以提前对\转义，否则会对转义后的转义字符重复转义。目前转义的字符是【\,+,?,*,.】
         for char in "\\+?*.":
             new_position_match = new_position_match.replace(char, f"\\{char}")
-        regex_result = re.fullmatch(f"\\.*{new_position_match}\\.*", regex)
+        regex_result = re.search(f"\\.*{new_position_match}\\.*", regex)
         if regex_result:
             regex_math_list.append(regex)
     if regex_math_list:
@@ -126,7 +126,7 @@ def find_relevant_talent(geek: dict):
         lid = geekCard.get("lid")
         securityId = geekCard.get("securityId")
         encryptGeekId = geekCard.get("encryptGeekId")
-        time.sleep(random.randint(1, 10))  # 随机延时1-10秒，防止出现人机验证
+        time.sleep(random.randint(3, 10))  # 随机延时3-10秒，防止出现人机验证
         if start_greet(expectId, securityId, lid, encryptGeekId, geekName):
             return True
     return False
@@ -161,7 +161,7 @@ def query_resume():
     sum_resume = 0
     start_greet_count = 0
     for i in range(1, 1 + _page):
-        time.sleep(random.randint(1, 10))  # 随机延时1-10秒，防止出现人机验证
+        time.sleep(random.randint(3, 10))  # 随机延时3-10秒，防止出现人机验证
         request = urllib.request.Request(f"{query_url_all}&page={i}", headers=headers)
         try:
             response = urllib.request.urlopen(request)
@@ -191,7 +191,7 @@ def query_resume():
                     else:
                         logger.warning(f"当前第【{i}】页，本页没有获取到简历。")
                         break
-                    if not _page <= 30 and zp.get("hasMore"):
+                    if not zp.get("hasMore"):
                         logger.warning(f"当前第【{i}】页，没有更多的简历了。")
                         break
                 else:
@@ -216,7 +216,7 @@ def query_resume():
             logger.error(e)
             break
 
-    logger.critical(f"共处理【{sum_resume}】份简历，共向【{start_greet_count}】位应聘者打招呼。")
+    logger.success(f"共处理【{sum_resume}】份简历，共向【{start_greet_count}】位应聘者打招呼。")
 
 
 if __name__ == '__main__':
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     _cookie = f"wt2={_wt2}"
     _encryptJobId = "c99d46982f8c9e961Xd-09q4GVFY"  # jobid,发布职位的id
     _position_match = "C++"  # 要匹配的职位
-    _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，超过30页需要去除hasMore的判断
+    _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，不支持30页以上的参数
     _school_check = True  # 是否匹配教育经历
     _log_level = "INFO"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
     logger.remove()
