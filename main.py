@@ -231,7 +231,7 @@ if __name__ == '__main__':
     _position_match = "C++"  # 要匹配的职位
     _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，超过30页需要去除hasMore的判断
     _school_check = True  # 是否匹配教育经历
-    _log_level = "SUCCESS"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
+    _log_level = "INFO"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
     logger.remove()
     logger.add(sys.stderr, level=_log_level)
     if _school_check:
