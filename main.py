@@ -132,6 +132,53 @@ def find_relevant_talent(geek: dict):
     return False
 
 
+def query_position(position_name: str) -> str:
+    headers = dict()
+    headers["Cookie"] = _cookie  # 必须，否则会报'{"code":7,"message":"当前登录状态已失效","zpData":{}}'
+    headers["User-Agent"] = _user_agent  # 非必须
+    query_position_url = "https://www.zhipin.com/wapi/zpjob/job/data/list?position=0&type=0"
+    request = urllib.request.Request(f"{query_position_url}", headers=headers)
+    try:
+        response = urllib.request.urlopen(request)
+        result_str: str = response.read().decode()
+        if not result_str:
+            logger.warning(f"查询职位列表请求结果为空")
+        response_content_type = None
+        for header_tuple in response.headers._headers:
+            if header_tuple[0] == 'Content-Type':
+                response_content_type = header_tuple[1]
+        if response_content_type == "application/json" or response_content_type == "application/json;charset=UTF-8":
+            result_json: dict = json.loads(result_str)
+            if result_json.get("code") == 0:
+                zp: dict = result_json.get("zpData")
+                if zp and zp.get("data"):
+                    position_size = len(zp.get("data"))
+                    logger.info(f"共获取到【{position_size}】个职位。")
+                    for position_detail in zp.get("data"):
+                        if position_detail.get("jobName") == position_name:
+                            logger.success(f"找到【{position_name}】职位，职位id为【{position_detail.get('encryptJobId')}】")
+                            return position_detail.get("encryptJobId")
+                    logger.warning(f"职位列表中没有找到【{position_name}】职位")
+                else:
+                    logger.warning(f"查询职位列表为空。")
+            else:
+                logger.error(f"查询职位列表失败，错误码：{result_json.get('code')}，错误信息：{result_json.get('message')}")
+                logger.debug(f"查询职位列表失败，查询返回的json：{result_json}")
+        else:
+            logger.warning(f"查询职位列表的结果为【{response_content_type}】类型。")
+            logger.error(f"查询职位列表失败，可能出现人机验证，请到网页进行验证。")
+            logger.debug(f"查询职位列表，查询返回结果如下：\n{result_str}")
+    except URLError as e:
+        logger.error(f"查询职位列表，发生URLError异常，一般重试即可。")
+        logger.error(e)
+    except OSError as e:
+        logger.error(f"查询职位列表，发生OSError异常")
+        logger.error(e)
+    except Exception as e:
+        logger.error(f"查询职位列表，发生未知异常")
+        logger.error(e)
+
+
 def query_resume():
     headers = dict()
     headers["Cookie"] = _cookie  # 必须，否则会报'{"code":7,"message":"当前登录状态已失效","zpData":{}}'
@@ -227,7 +274,7 @@ if __name__ == '__main__':
     # __a=60503236.1657273107.1663552951.1664158854.290.19.2.74; zp_token=V1RN4vF-L52VhiVtRvyRkcLSmy5TPVzSo%7E"
     _wt2 = "DMNUqkUp0RqCcgpmtzRV7MipLqEpyO9ZY9Iq94mTSKlODg1zn9JqUqdm0BBOMsIH7fYxO7eCvbdjnzyQ1b4KH8A~~"
     _cookie = f"wt2={_wt2}"
-    _encryptJobId = "c99d46982f8c9e961Xd-09q4GVFY"  # jobid,发布职位的id
+    _encryptJobId = query_position("C/C++开发工程师")  # 要匹配的职位，精确匹配
     _position_match = "C++"  # 要匹配的职位
     _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，不支持30页以上的参数
     _school_check = True  # 是否匹配教育经历，默认匹配

@@ -39,16 +39,14 @@
 main文件全局变量说明：
 
     _wt2：# 用于boss登录信息验证
-    _encryptJobId = "c99d46982f8c9e961Xd-09q4GVFY"  # jobid,发布职位的id
+    _encryptJobId = query_position("C/C++开发工程师")  # 要匹配的职位，精确匹配，返回jobid,发布职位的id
     _position_match = "C++"  # 要匹配的职位
-    _page = 1000  # 查询的页数，每页15条应聘者数据
+    _page = 30  # 查询的页数，每页15条应聘者数据
     _school_check = True  # 是否匹配教育经历，默认匹配
     _log_level = "INFO"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
 匹配教育经历是从schoolList.txt文件中匹配的，可根据自己的需要去修改对应的院校清单，每个院校换行间隔
 
-jobid目前需要在浏览器中通过开发者工具获取，先打开开发者工具，然后点击职位管理，
-这时候会调用一个list接口，在这个接口的返回数据中找到我们需要的jobid
-![img.png](readme/get_jobId.png)
+jobid是从岗位列表中中获取的，这里是精准匹配，需要在query_position()方法中传入精确的职位名称
 
 _wt2是存储在浏览器cookie中的值，先打开浏览器的cookie数据，搜索zhipin，
 找到zhipin.com这条数据记录，点击进去
@@ -58,11 +56,9 @@ _wt2是存储在浏览器cookie中的值，先打开浏览器的cookie数据，�
 点击详情复制这条cookie的内容
 ![img.png](readme/get_cookie_2.png)
 
-然后我们替换这四个全局变量，再点击运行就可以了
+然后我们替换_wt2登录信息、query_position方法的参数、_page查询页数、_school_check是否校验院校名单这四个全局变量，再点击运行就可以了
 
 ## 待优化项目
 1.查询参数具体代码的释义
 
 2.教育类型的匹配，全日制和非全日制目前在列表页无法区分
-
-3.岗位编码通过程序自动获取
