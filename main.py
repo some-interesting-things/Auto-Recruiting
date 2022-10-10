@@ -95,7 +95,7 @@ def find_relevant_talent(geek: dict):
         # 对正则的特殊字符进行转义，由于转义的时候会用到\所以提前对\转义，否则会对转义后的转义字符重复转义。目前转义的字符是【\,+,?,*,.】
         for char in "\\+?*.":
             new_position_match = new_position_match.replace(char, f"\\{char}")
-        regex_result = re.fullmatch(f"\\.*{new_position_match}\\.*", regex)
+        regex_result = re.search(f"\\.*{new_position_match}\\.*", regex)
         if regex_result:
             regex_math_list.append(regex)
     if regex_math_list:
@@ -161,7 +161,7 @@ def query_resume():
     sum_resume = 0
     start_greet_count = 0
     for i in range(1, 1 + _page):
-        time.sleep(random.randint(1, 10))  # 随机延时1-10秒，防止出现人机验证
+        time.sleep(random.randint(3, 10))  # 随机延时3-10秒，防止出现人机验证
         request = urllib.request.Request(f"{query_url_all}&page={i}", headers=headers)
         try:
             response = urllib.request.urlopen(request)
@@ -216,7 +216,7 @@ def query_resume():
             logger.error(e)
             break
 
-    logger.critical(f"共处理【{sum_resume}】份简历，共向【{start_greet_count}】位应聘者打招呼。")
+    logger.success(f"共处理【{sum_resume}】份简历，共向【{start_greet_count}】位应聘者打招呼。")
 
 
 if __name__ == '__main__':
