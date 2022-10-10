@@ -191,7 +191,7 @@ def query_resume():
                     else:
                         logger.warning(f"当前第【{i}】页，本页没有获取到简历。")
                         break
-                    if _page <= 30 and not zp.get("hasMore"):
+                    if not zp.get("hasMore"):
                         logger.warning(f"当前第【{i}】页，没有更多的简历了。")
                         break
                 else:
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     _cookie = f"wt2={_wt2}"
     _encryptJobId = "c99d46982f8c9e961Xd-09q4GVFY"  # jobid,发布职位的id
     _position_match = "C++"  # 要匹配的职位
-    _page = 50  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，超过30页需要去除hasMore的判断
+    _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，不支持30页以上的参数
     _school_check = True  # 是否匹配教育经历
     _log_level = "INFO"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
     logger.remove()
