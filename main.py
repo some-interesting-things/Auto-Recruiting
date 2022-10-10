@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import urllib.request
+from datetime import datetime
 from typing import List
 from urllib import parse
 from urllib.error import URLError
@@ -49,6 +50,12 @@ def start_greet(expectId: str, securityId: str, lid: str, encryptGeekId: str, ge
 
 def check_edu_list(school_name: str) -> bool:
     return True if _school_list.count(school_name) else False
+
+
+def check_edu_end_date(end_date: str) -> bool:
+    if len(end_date) > 4:
+        return datetime.today().year >= int(end_date[:4])
+    return True
 
 
 def find_relevant_talent(geek: dict):
@@ -98,9 +105,11 @@ def find_relevant_talent(geek: dict):
                 school = edu.get("school")
                 major = edu.get("major")
                 degreeName = edu.get("degreeName")
+                eduType = edu.get("eduType")  # 教育类型：1 全日制，2 非全日制，列表页没有给到具体的类型
                 startDate = edu.get("startDate")
                 endDate = edu.get("endDate")
-                if check_edu_list(school):
+
+                if check_edu_end_date(endDate) and check_edu_list(school):
                     logger.info(f"匹配到的教育经历：学校：{school}，专业：{major}，学历：{degreeName}，开始时间：{startDate}，"
                                 f"结束时间：{endDate}。")
                     break
@@ -134,7 +143,7 @@ def query_resume():
     switchJob = "0"  # 跳槽频率：0不限
     activation = "2505"  # 活跃度：2505本月活跃
     recentNotView = "2301"  # 近期没有看过：2301近14天没有
-    school = "1104,1105,1106,1103,1102"  # 学校：
+    school = "0"  # 学校：
     major = "0"  # 专业：0不限
     experience = "104,105,106,103"  # 工作经验：0不限
     degree = "203,204,205"  # 学位：
@@ -182,7 +191,7 @@ def query_resume():
                     else:
                         logger.warning(f"当前第【{i}】页，本页没有获取到简历。")
                         break
-                    if not zp.get("hasMore"):
+                    if not _page <= 30 and zp.get("hasMore"):
                         logger.warning(f"当前第【{i}】页，没有更多的简历了。")
                         break
                 else:
@@ -220,9 +229,9 @@ if __name__ == '__main__':
     _cookie = f"wt2={_wt2}"
     _encryptJobId = "c99d46982f8c9e961Xd-09q4GVFY"  # jobid,发布职位的id
     _position_match = "C++"  # 要匹配的职位
-    _page = 30  # 查询的页数，每页15条应聘者数据
+    _page = 30  # 查询的页数，每页15条应聘者数据，网页上一次最多只给查30页的数据，超过30页需要去除hasMore的判断
     _school_check = True  # 是否匹配教育经历
-    _log_level = "SUCCESS"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
+    _log_level = "INFO"  # 日志等级，默认INFO，可选DEBUG，SUCCESS，ERROR，WARNING等
     logger.remove()
     logger.add(sys.stderr, level=_log_level)
     if _school_check:
