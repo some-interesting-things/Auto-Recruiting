@@ -15,7 +15,8 @@ from urllib.error import URLError
 
 from loguru import logger
 
-_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42"
+_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome" \
+              "/105.0.0.0 Safari/537.36 Edg/105.0.1343.42"
 
 
 def start_greet(expectId: str, securityId: str, lid: str, encryptGeekId: str, geekName: str):
@@ -48,8 +49,21 @@ def start_greet(expectId: str, securityId: str, lid: str, encryptGeekId: str, ge
         return False
 
 
-def check_edu_list(school_name: str) -> bool:
-    return True if _school_list.count(school_name) else False
+def check_edu_list(geekEdus: list, ) -> bool:
+    if not _school_list:
+        return True
+    if geekEdus:
+        for edu in geekEdus:
+            school = edu.get("school")
+            major = edu.get("major")
+            degreeName = edu.get("degreeName")
+            eduType = edu.get("eduType")  # 教育类型：1 全日制，2 非全日制，列表页没有给到具体的类型
+            startDate = edu.get("startDate")
+            endDate = edu.get("endDate")
+
+            if check_edu_end_date(endDate) and _school_list and _school_list.count(school):
+                return True
+    return False
 
 
 def check_edu_end_date(end_date: str) -> bool:
@@ -100,28 +114,16 @@ def find_relevant_talent(geek: dict):
             regex_math_list.append(regex)
     if regex_math_list:
         logger.info(f"匹配到岗位关键字：{regex_math_list}")
-        if geekEdus:
-            for index, edu in enumerate(geekEdus):
-                school = edu.get("school")
-                major = edu.get("major")
-                degreeName = edu.get("degreeName")
-                eduType = edu.get("eduType")  # 教育类型：1 全日制，2 非全日制，列表页没有给到具体的类型
-                startDate = edu.get("startDate")
-                endDate = edu.get("endDate")
-
-                if check_edu_end_date(endDate) and check_edu_list(school):
-                    logger.info(f"匹配到的教育经历：学校：{school}，专业：{major}，学历：{degreeName}，开始时间：{startDate}，"
-                                f"结束时间：{endDate}。")
-                    break
-                if index == len(geekEdus) - 1:
-                    logger.info(f"未匹配到教育经历：候选人姓名：{geekName}，性别：{'男' if geekGender == 1 else '女'}，"
-                                f"工作年限：{geekWorkYear}，期望岗位：{expectPositionName}，学历：{geekDegree}，"
-                                f"学校：{height_school}，毕业时间：{graduationDate}，专业：{height_major}")
-                    return
-        logger.success(
-            f"匹配到简历：候选人姓名：{geekName}，性别：{'男' if geekGender == 1 else '女'}，工作年限：{geekWorkYear}，"
-            f"期望岗位：{expectPositionName}，学历：{geekDegree}，学校：{height_school}，毕业时间：{graduationDate}，"
-            f"专业：{height_major}")
+        if check_edu_list(geekEdus):
+            logger.success(
+                f"匹配到简历：候选人姓名：{geekName}，性别：{'男' if geekGender == 1 else '女'}，工作年限：{geekWorkYear}，"
+                f"期望岗位：{expectPositionName}，学历：{geekDegree}，学校：{height_school}，毕业时间：{graduationDate}，"
+                f"专业：{height_major}")
+        else:
+            logger.info(f"未匹配到教育经历：候选人姓名：{geekName}，性别：{'男' if geekGender == 1 else '女'}，"
+                        f"工作年限：{geekWorkYear}，期望岗位：{expectPositionName}，学历：{geekDegree}，"
+                        f"学校：{height_school}，毕业时间：{graduationDate}，专业：{height_major}")
+            return False
         expectId = geekCard.get("expectId")
         lid = geekCard.get("lid")
         securityId = geekCard.get("securityId")
@@ -197,10 +199,6 @@ def query_resume():
     intention = "701,704,703"  # 求职意向
     salary = "0"  # 薪资待遇：0不限
     query_base_url = "https://www.zhipin.com/wapi/zpjob/rec/geek/list"
-    query_url = f"https://www.zhipin.com/wapi/zpjob/rec/geek/list?age=16,29&gender=0&exchangeResumeWithColleague=0" \
-                f"&switchJobFrequency=0&activation=2505&recentNotView=2301&school=1104,1105,1106,1103,1102&major=0" \
-                f"&experience=104,105,106,103&degree=203,204,205&salary=0&intention=701,704,703&jobId={_encryptJobId}" \
-                f"&page=1&coverScreenMemory=1&_=1664440095639"
     query_url_all = f"{query_base_url}?age={age}&gender={gender}&exchangeResumeWithColleague={exchangeResume}" \
                     f"&switchJobFrequency={switchJob}&activation={activation}&recentNotView={recentNotView}" \
                     f"&school={school}&major={major}&experience={experience}&degree={degree}&salary={salary}" \
@@ -262,16 +260,10 @@ def query_resume():
             logger.error(f"当前第【{i}】页，发生未知异常")
             logger.error(e)
             break
-
     logger.success(f"共处理【{sum_resume}】份简历，共向【{start_greet_count}】位应聘者打招呼。")
 
 
 if __name__ == '__main__':
-    # cookie = "wd_guid=ab4bc162-c51a-4869-9db3-da0a3c965061; historyState=state; _bl_uid=4vlL85k6gbb1mXbpXf9eetq4wCnz;
-    # lastCity=101210100; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1661156155,1662340656,1663552953;
-    # wt2=Dg_v58CDzj-7CQjwxWSCq6aYBeMA4GQZ6n8GuoicAuz49tiTcvq4vlZY6U_VHNdt4NQvSv339qhsAvvOuviJzqQ~~;
-    # wbg=1; __g=-; __l=l=%2Fwww.zhipin.com%2Fweb%2Fboss%2Findex&r=&g=&s=3&friend_source=0; __c=1664158854;
-    # __a=60503236.1657273107.1663552951.1664158854.290.19.2.74; zp_token=V1RN4vF-L52VhiVtRvyRkcLSmy5TPVzSo%7E"
     _wt2 = "DMNUqkUp0RqCcgpmtzRV7MipLqEpyO9ZY9Iq94mTSKlODg1zn9JqUqdm0BBOMsIH7fYxO7eCvbdjnzyQ1b4KH8A~~"
     _cookie = f"wt2={_wt2}"
     _encryptJobId = query_position("C/C++开发工程师")  # 要匹配的职位，精确匹配
