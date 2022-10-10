@@ -45,9 +45,11 @@ main文件全局变量说明：
 jobid目前需要在浏览器中通过开发者工具获取，先打开开发者工具，然后点击职位管理，
 这时候会调用一个list接口，在这个接口的返回数据中找到我们需要的jobid
 ![img.png](readme/get_jobId.png)
+
 _wt2是存储在浏览器cookie中的值，先打开浏览器的cookie数据，搜索zhipin，
 找到zhipin.com这条数据记录，点击进去
 ![img.png](readme/get_cookie_1.png)
+
 进去之后我们就看到了这个网站下存储的所有cookie，我们这里只需要_wt2这个cookie，
 点击详情复制这条cookie的内容
 ![img.png](readme/get_cookie_2.png)
@@ -56,5 +58,7 @@ _wt2是存储在浏览器cookie中的值，先打开浏览器的cookie数据，�
 
 ## 待优化项目
 1.查询参数具体代码的释义
+
 2.教育类型的匹配，全日制和非全日制目前在列表页无法区分
+
 3.岗位编码通过程序自动获取
